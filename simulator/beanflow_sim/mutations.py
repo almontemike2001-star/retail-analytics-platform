@@ -51,6 +51,19 @@ class MutationSummary:
     promotions_added: int = 0
 
 
+PROMO_VISIBLE_MINUTE = 6 * 60   # new campaigns become visible in the POS at 06:00 on the day they are loaded
+
+
+def stamp_new_promotions(rows: list[PromotionRow], day: date, first_id: int) -> list[PromotionRow]:
+    """Assign ids and the source timestamp for campaigns first loaded on business day `day`.
+
+    updated_at is always D 06:00 Asia/Manila - never backdated - so the row falls inside
+    business day D's extraction window [D 00:00, D+1 00:00).
+    """
+    visible_at = local_ts(day, PROMO_VISIBLE_MINUTE)
+    return [p._replace(promotion_id=first_id + i, updated_at=visible_at) for i, p in enumerate(rows)]
+
+
 def ensure_promotions(conn: psycopg.Connection, day: date) -> int:
     """Make sure campaigns exist for this month and the month 14 days ahead."""
     added = 0
@@ -59,9 +72,7 @@ def ensure_promotions(conn: psycopg.Connection, day: date) -> int:
         existing = db.existing_promo_codes(conn, [p.promo_code for p in candidates])
         missing = [p for p in candidates if p.promo_code not in existing]
         if missing:
-            first = db.next_id(conn, "promotions")
-            created = min(missing[0].updated_at, local_ts(day, 6 * 60))   # never later than "today"
-            rows = [p._replace(promotion_id=first + i, updated_at=created) for i, p in enumerate(missing)]
+            rows = stamp_new_promotions(missing, day, db.next_id(conn, "promotions"))
             db.copy_rows(conn, "promotions", rows)
             added += len(rows)
     if added:
