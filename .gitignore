@@ -38,3 +38,11 @@ dbt/beanflow/dbt_packages/
 # IDE
 .vscode/
 .idea/
+
+# Python package build artifacts
+*.egg-info/
+build/
+
+# Additional secret patterns
+*-sa.json
+gcp-key*.json

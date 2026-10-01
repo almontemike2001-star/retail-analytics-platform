@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "beanflow-sim"
+version = "0.1.0"
+description = "Synthetic POS data simulator for the BeanFlow Coffee retail analytics platform (100% synthetic data)"
+requires-python = ">=3.12"
+dependencies = [
+    "psycopg[binary]>=3.2",
+    "Faker>=30",
+    "numpy>=2.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+beanflow-sim = "beanflow_sim.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["beanflow_sim*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
