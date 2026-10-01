@@ -1,0 +1,40 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+service-account*.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# macOS
+.DS_Store
+
+# Local data
+data/landing/*
+!data/landing/.gitkeep
+
+# Logs
+*.log
+logs/
+
+# Airflow local state
+airflow/logs/
+airflow/airflow.db
+
+# dbt generated
+dbt/beanflow/target/
+dbt/beanflow/logs/
+dbt/beanflow/dbt_packages/
+
+# IDE
+.vscode/
+.idea/
