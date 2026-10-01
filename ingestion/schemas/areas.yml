@@ -1,0 +1,7 @@
+# Explicit schema for pos.areas (source of truth for PostgreSQL checks, PyArrow and BigQuery).
+# Types: int64 | string | bool | date | timestamp (UTC) | decimal(P,S). Order = source column order.
+table: areas
+columns:
+  - {name: area_id, type: "int64", nullable: false}
+  - {name: region_id, type: "int64", nullable: false}
+  - {name: area_name, type: "string", nullable: false}

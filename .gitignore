@@ -46,3 +46,10 @@ build/
 # Additional secret patterns
 *-sa.json
 gcp-key*.json
+
+# Phase 3 ingestion local artifacts
+data/.load_tmp/
+data/audit/
+
+# Additional GCP credential patterns
+application_default_credentials.json

@@ -1,0 +1,82 @@
+# BeanFlow ingestion configuration: PostgreSQL pos.* -> Parquet landing -> BigQuery raw_pos.*
+#
+# Adding a source table = one entry below + one file in ingestion/schemas/. No code changes.
+# Paths are relative to the repository root. Environment variables override:
+#   GCP_PROJECT_ID, BQ_LOCATION, BQ_RAW_DATASET, BQ_AUDIT_DATASET, BEANFLOW_LANDING_ROOT
+version: 1
+
+defaults:
+  source_schema: pos
+  business_timezone: Asia/Manila
+  landing_root: data/landing
+  load_tmp_root: data/.load_tmp
+  audit_local_path: data/audit/ingestion_log.jsonl
+  file_name: part-000.parquet
+  bq_location: asia-southeast1
+  bq_raw_dataset: raw_pos
+  bq_audit_dataset: dq_audit
+  bq_audit_table: ingestion_log
+  partition_field: _ingestion_date
+  lookback_minutes: 60          # incremental tables only
+  settle_minutes: 5             # refuse windows closed less than this long ago
+  chunk_rows: 50000             # server-side cursor batch size
+  max_query_bytes: 1000000000   # cap for reconcile/check queries (1 GB)
+
+tables:
+  # ---- static reference tables: full extract every run --------------------------------
+  - name: regions
+    mode: full
+    primary_key: [region_id]
+    schema_file: ingestion/schemas/regions.yml
+  - name: areas
+    mode: full
+    primary_key: [area_id]
+    schema_file: ingestion/schemas/areas.yml
+  - name: product_categories
+    mode: full
+    primary_key: [category_id]
+    schema_file: ingestion/schemas/product_categories.yml
+
+  # ---- mutable tables: incremental on updated_at --------------------------------------
+  - name: stores
+    mode: incremental
+    primary_key: [store_id]
+    cursor_column: updated_at
+    cluster_by: [store_id]
+    schema_file: ingestion/schemas/stores.yml
+  - name: products
+    mode: incremental
+    primary_key: [product_id]
+    cursor_column: updated_at
+    cluster_by: [product_id]
+    schema_file: ingestion/schemas/products.yml
+  - name: customers
+    mode: incremental
+    primary_key: [customer_id]
+    cursor_column: updated_at
+    cluster_by: [customer_id]
+    schema_file: ingestion/schemas/customers.yml
+  - name: promotions
+    mode: incremental
+    primary_key: [promotion_id]
+    cursor_column: updated_at
+    cluster_by: [promotion_id]
+    schema_file: ingestion/schemas/promotions.yml
+  - name: orders
+    mode: incremental
+    primary_key: [order_id]
+    cursor_column: updated_at
+    cluster_by: [order_id]
+    schema_file: ingestion/schemas/orders.yml
+  - name: order_items
+    mode: incremental
+    primary_key: [order_item_id]
+    cursor_column: updated_at
+    cluster_by: [order_id, order_item_id]
+    schema_file: ingestion/schemas/order_items.yml
+  - name: payments
+    mode: incremental
+    primary_key: [payment_id]
+    cursor_column: updated_at
+    cluster_by: [order_id, payment_id]
+    schema_file: ingestion/schemas/payments.yml

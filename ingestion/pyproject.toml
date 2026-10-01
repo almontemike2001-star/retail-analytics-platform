@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "beanflow-ingest"
+version = "0.1.0"
+description = "BeanFlow EL: PostgreSQL pos.* -> immutable Parquet landing -> BigQuery Bronze (raw_pos) + dq_audit"
+requires-python = ">=3.12"
+dependencies = [
+    "psycopg[binary]>=3.2",
+    "pyarrow>=16",
+    "PyYAML>=6",
+    "google-cloud-bigquery>=3.25",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+ingest = "beanflow_ingest.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["beanflow_ingest*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q -m 'not bigquery'"
+markers = [
+    "integration: needs a reachable PostgreSQL (uses a dedicated beanflow_ingest_test database) and beanflow_sim",
+    "bigquery: needs live GCP credentials; excluded by default (run with: pytest -m bigquery)",
+]

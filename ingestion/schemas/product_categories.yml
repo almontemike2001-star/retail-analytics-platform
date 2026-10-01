@@ -1,0 +1,7 @@
+# Explicit schema for pos.product_categories (source of truth for PostgreSQL checks, PyArrow and BigQuery).
+# Types: int64 | string | bool | date | timestamp (UTC) | decimal(P,S). Order = source column order.
+table: product_categories
+columns:
+  - {name: category_id, type: "int64", nullable: false}
+  - {name: category_name, type: "string", nullable: false}
+  - {name: category_group, type: "string", nullable: false}

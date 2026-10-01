@@ -1,0 +1,17 @@
+# Explicit schema for pos.orders (source of truth for PostgreSQL checks, PyArrow and BigQuery).
+# Types: int64 | string | bool | date | timestamp (UTC) | decimal(P,S). Order = source column order.
+table: orders
+columns:
+  - {name: order_id, type: "int64", nullable: false}
+  - {name: order_number, type: "string", nullable: false}
+  - {name: store_id, type: "int64", nullable: false}
+  - {name: customer_id, type: "int64", nullable: true}
+  - {name: promotion_id, type: "int64", nullable: true}
+  - {name: order_ts, type: "timestamp", nullable: false}
+  - {name: order_channel, type: "string", nullable: false}
+  - {name: order_status, type: "string", nullable: false}
+  - {name: subtotal, type: "decimal(12,2)", nullable: false}
+  - {name: discount_amount, type: "decimal(12,2)", nullable: false}
+  - {name: tax_amount, type: "decimal(12,2)", nullable: false}
+  - {name: total_amount, type: "decimal(12,2)", nullable: false}
+  - {name: updated_at, type: "timestamp", nullable: false}

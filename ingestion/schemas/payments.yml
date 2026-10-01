@@ -1,0 +1,11 @@
+# Explicit schema for pos.payments (source of truth for PostgreSQL checks, PyArrow and BigQuery).
+# Types: int64 | string | bool | date | timestamp (UTC) | decimal(P,S). Order = source column order.
+table: payments
+columns:
+  - {name: payment_id, type: "int64", nullable: false}
+  - {name: order_id, type: "int64", nullable: false}
+  - {name: payment_method, type: "string", nullable: false}
+  - {name: amount, type: "decimal(12,2)", nullable: false}
+  - {name: payment_status, type: "string", nullable: false}
+  - {name: paid_at, type: "timestamp", nullable: false}
+  - {name: updated_at, type: "timestamp", nullable: false}

@@ -1,0 +1,6 @@
+# Explicit schema for pos.regions (source of truth for PostgreSQL checks, PyArrow and BigQuery).
+# Types: int64 | string | bool | date | timestamp (UTC) | decimal(P,S). Order = source column order.
+table: regions
+columns:
+  - {name: region_id, type: "int64", nullable: false}
+  - {name: region_name, type: "string", nullable: false}

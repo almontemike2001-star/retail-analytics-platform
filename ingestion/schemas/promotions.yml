@@ -1,0 +1,13 @@
+# Explicit schema for pos.promotions (source of truth for PostgreSQL checks, PyArrow and BigQuery).
+# Types: int64 | string | bool | date | timestamp (UTC) | decimal(P,S). Order = source column order.
+table: promotions
+columns:
+  - {name: promotion_id, type: "int64", nullable: false}
+  - {name: promo_code, type: "string", nullable: false}
+  - {name: promo_name, type: "string", nullable: false}
+  - {name: promo_type, type: "string", nullable: false}
+  - {name: discount_value, type: "decimal(12,2)", nullable: false}
+  - {name: min_order_amount, type: "decimal(12,2)", nullable: false}
+  - {name: start_date, type: "date", nullable: false}
+  - {name: end_date, type: "date", nullable: false}
+  - {name: updated_at, type: "timestamp", nullable: false}
