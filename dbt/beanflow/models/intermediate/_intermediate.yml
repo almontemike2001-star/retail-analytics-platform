@@ -1,0 +1,84 @@
+version: 2
+
+models:
+  - name: int_product_versions
+    columns:
+      - name: product_id
+        tests:
+          - not_null
+
+      - name: valid_from
+        tests:
+          - not_null
+
+  - name: int_store_versions
+    columns:
+      - name: store_id
+        tests:
+          - not_null
+
+      - name: valid_from
+        tests:
+          - not_null
+
+  - name: int_store_calendar
+    columns:
+      - name: store_sk
+        tests:
+          - not_null
+
+      - name: store_id
+        tests:
+          - not_null
+
+      - name: business_date
+        tests:
+          - not_null
+
+  - name: int_store_daily_orders
+    columns:
+      - name: store_id
+        tests:
+          - not_null
+
+      - name: store_sk
+        tests:
+          - not_null
+
+      - name: business_date
+        tests:
+          - not_null
+
+      - name: transaction_count
+        tests:
+          - not_null
+
+      - name: total_sales
+        tests:
+          - not_null
+
+  - name: int_store_daily_items
+    columns:
+      - name: store_id
+        tests:
+          - not_null
+
+      - name: store_sk
+        tests:
+          - not_null
+
+      - name: business_date
+        tests:
+          - not_null
+
+      - name: product_quantity
+        tests:
+          - not_null
+
+      - name: total_cost
+        tests:
+          - not_null
+
+      - name: gross_margin
+        tests:
+          - not_null

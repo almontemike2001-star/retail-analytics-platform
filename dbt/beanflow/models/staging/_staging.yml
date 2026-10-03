@@ -1,0 +1,89 @@
+version: 2
+
+models:
+  - name: stg_regions
+    columns:
+      - name: region_id
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_areas
+    columns:
+      - name: area_id
+        tests:
+          - not_null
+          - unique
+      - name: region_id
+        tests:
+          - not_null
+
+  - name: stg_product_categories
+    columns:
+      - name: category_id
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_stores
+    columns:
+      - name: store_id
+        tests:
+          - not_null
+      - name: updated_at
+        tests:
+          - not_null
+
+  - name: stg_products
+    columns:
+      - name: product_id
+        tests:
+          - not_null
+      - name: updated_at
+        tests:
+          - not_null
+
+  - name: stg_customers
+    columns:
+      - name: customer_id
+        tests:
+          - not_null
+      - name: updated_at
+        tests:
+          - not_null
+
+  - name: stg_promotions
+    columns:
+      - name: promotion_id
+        tests:
+          - not_null
+      - name: updated_at
+        tests:
+          - not_null
+
+  - name: stg_orders
+    columns:
+      - name: order_id
+        tests:
+          - not_null
+      - name: updated_at
+        tests:
+          - not_null
+
+  - name: stg_order_items
+    columns:
+      - name: order_item_id
+        tests:
+          - not_null
+      - name: updated_at
+        tests:
+          - not_null
+
+  - name: stg_payments
+    columns:
+      - name: payment_id
+        tests:
+          - not_null
+      - name: updated_at
+        tests:
+          - not_null

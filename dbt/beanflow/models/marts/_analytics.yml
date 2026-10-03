@@ -1,0 +1,331 @@
+version: 2
+
+models:
+  - name: executive_daily
+    description: >
+      Company-level daily executive KPI mart. One row per business date.
+      Metrics are based on completed orders and eligible open store-days.
+
+    columns:
+      - name: date_key
+        tests:
+          - not_null
+          - unique
+
+      - name: business_date
+        tests:
+          - not_null
+          - unique
+
+      - name: active_stores
+        tests:
+          - not_null
+
+      - name: store_days
+        tests:
+          - not_null
+
+      - name: transaction_count
+        tests:
+          - not_null
+
+      - name: product_quantity
+        tests:
+          - not_null
+
+      - name: total_sales
+        tests:
+          - not_null
+
+      - name: total_cost
+        tests:
+          - not_null
+
+      - name: gross_margin
+        tests:
+          - not_null
+
+      - name: aov
+        tests:
+          - not_null
+
+      - name: ads
+        tests:
+          - not_null
+
+      - name: adq
+        tests:
+          - not_null
+
+  - name: store_performance
+    description: >
+      Store-day performance mart enriched with store hierarchy and calendar
+      attributes for filtering by date, store, area, region, and store type.
+
+    columns:
+      - name: store_day_key
+        tests:
+          - not_null
+          - unique
+
+      - name: date_key
+        tests:
+          - not_null
+
+      - name: business_date
+        tests:
+          - not_null
+
+      - name: store_sk
+        tests:
+          - not_null
+
+      - name: store_id
+        tests:
+          - not_null
+
+      - name: store_name
+        tests:
+          - not_null
+
+      - name: store_type
+        tests:
+          - not_null
+
+      - name: area_id
+        tests:
+          - not_null
+
+      - name: area_name
+        tests:
+          - not_null
+
+      - name: region_id
+        tests:
+          - not_null
+
+      - name: region_name
+        tests:
+          - not_null
+
+      - name: transaction_count
+        tests:
+          - not_null
+
+      - name: product_quantity
+        tests:
+          - not_null
+
+      - name: total_sales
+        tests:
+          - not_null
+
+      - name: total_cost
+        tests:
+          - not_null
+
+      - name: gross_margin
+        tests:
+          - not_null
+
+      - name: is_open_day
+        tests:
+          - not_null
+
+  - name: product_performance
+    description: >
+      Daily product performance mart based on completed order items.
+      Historical product attributes are resolved through the SCD2 product
+      surrogate key.
+
+    columns:
+      - name: product_day_key
+        tests:
+          - not_null
+          - unique
+
+      - name: date_key
+        tests:
+          - not_null
+
+      - name: business_date
+        tests:
+          - not_null
+
+      - name: product_sk
+        tests:
+          - not_null
+
+      - name: product_id
+        tests:
+          - not_null
+
+      - name: sku
+        tests:
+          - not_null
+
+      - name: product_name
+        tests:
+          - not_null
+
+      - name: category_id
+        tests:
+          - not_null
+
+      - name: category_name
+        tests:
+          - not_null
+
+      - name: transaction_count
+        tests:
+          - not_null
+
+      - name: order_line_count
+        tests:
+          - not_null
+
+      - name: product_quantity
+        tests:
+          - not_null
+
+      - name: product_sales
+        tests:
+          - not_null
+
+      - name: total_cost
+        tests:
+          - not_null
+
+      - name: gross_margin
+        tests:
+          - not_null
+
+      - name: average_selling_price
+        tests:
+          - not_null
+
+      - name: avg_units_per_transaction
+        tests:
+          - not_null
+
+      - name: gross_margin_rate
+        tests:
+          - not_null
+
+  - name: customer_cohorts
+    description: >
+      Monthly customer cohort retention mart based on each customer's first
+      completed purchase month. Month N is non-cumulative and represents
+      activity in the corresponding calendar month.
+
+    columns:
+      - name: cohort_month_key
+        tests:
+          - not_null
+          - unique
+
+      - name: cohort_month
+        tests:
+          - not_null
+
+      - name: activity_month
+        tests:
+          - not_null
+
+      - name: month_number
+        tests:
+          - not_null
+
+      - name: cohort_size
+        tests:
+          - not_null
+
+      - name: active_customers
+        tests:
+          - not_null
+
+      - name: transaction_count
+        tests:
+          - not_null
+
+      - name: total_sales
+        tests:
+          - not_null
+
+      - name: retention_rate
+        tests:
+          - not_null
+
+      - name: sales_per_active_customer
+        tests:
+          - not_null
+
+  - name: customer_rfm
+    description: >
+      Customer-level RFM segmentation based on completed purchases.
+      Recency is measured against the latest available business date.
+      Frequency is distinct completed orders and monetary is completed
+      order revenue.
+
+    columns:
+      - name: customer_id
+        tests:
+          - not_null
+          - unique
+
+      - name: customer_sk
+        tests:
+          - not_null
+          - unique
+
+      - name: as_of_date
+        tests:
+          - not_null
+
+      - name: first_purchase_date
+        tests:
+          - not_null
+
+      - name: last_purchase_date
+        tests:
+          - not_null
+
+      - name: recency_days
+        tests:
+          - not_null
+
+      - name: frequency
+        tests:
+          - not_null
+
+      - name: monetary
+        tests:
+          - not_null
+
+      - name: average_order_value
+        tests:
+          - not_null
+
+      - name: recency_score
+        tests:
+          - not_null
+
+      - name: frequency_score
+        tests:
+          - not_null
+
+      - name: monetary_score
+        tests:
+          - not_null
+
+      - name: rfm_score
+        tests:
+          - not_null
+
+      - name: rfm_total_score
+        tests:
+          - not_null
+
+      - name: customer_segment
+        tests:
+          - not_null

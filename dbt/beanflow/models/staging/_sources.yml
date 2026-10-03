@@ -1,0 +1,18 @@
+version: 2
+
+sources:
+  - name: raw_pos
+    database: beanflow-retail-analytics-2026
+    schema: raw_pos
+
+    tables:
+      - name: regions
+      - name: areas
+      - name: product_categories
+      - name: stores
+      - name: products
+      - name: customers
+      - name: promotions
+      - name: orders
+      - name: order_items
+      - name: payments

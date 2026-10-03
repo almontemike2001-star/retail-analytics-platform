@@ -1,0 +1,326 @@
+version: 2
+
+models:
+  - name: dim_product
+    columns:
+      - name: product_sk
+        tests:
+          - not_null
+          - unique
+
+      - name: product_id
+        tests:
+          - not_null
+
+      - name: category_id
+        tests:
+          - not_null
+
+      - name: valid_from
+        tests:
+          - not_null
+
+      - name: is_current
+        tests:
+          - not_null
+
+  - name: dim_store
+    columns:
+      - name: store_sk
+        tests:
+          - not_null
+          - unique
+
+      - name: store_id
+        tests:
+          - not_null
+
+      - name: area_id
+        tests:
+          - not_null
+
+      - name: region_id
+        tests:
+          - not_null
+
+      - name: valid_from
+        tests:
+          - not_null
+
+      - name: is_current
+        tests:
+          - not_null
+
+  - name: dim_customer
+    columns:
+      - name: customer_sk
+        tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        tests:
+          - not_null
+          - unique
+
+      - name: signup_date
+        tests:
+          - not_null
+
+      - name: loyalty_tier
+        tests:
+          - not_null
+
+      - name: updated_at
+        tests:
+          - not_null
+
+  - name: dim_promotion
+    columns:
+      - name: promotion_sk
+        tests:
+          - not_null
+          - unique
+
+      - name: promotion_id
+        tests:
+          - not_null
+          - unique
+
+      - name: promo_code
+        tests:
+          - not_null
+
+      - name: promo_name
+        tests:
+          - not_null
+
+      - name: promo_type
+        tests:
+          - not_null
+
+      - name: start_date
+        tests:
+          - not_null
+
+      - name: end_date
+        tests:
+          - not_null
+
+  - name: dim_date
+    columns:
+      - name: date_key
+        tests:
+          - not_null
+          - unique
+
+      - name: calendar_date
+        tests:
+          - not_null
+          - unique
+
+      - name: year
+        tests:
+          - not_null
+
+      - name: month_number
+        tests:
+          - not_null
+
+      - name: day_of_month
+        tests:
+          - not_null
+
+      - name: day_name
+        tests:
+          - not_null
+
+      - name: is_weekend
+        tests:
+          - not_null
+
+  - name: dim_time
+    columns:
+      - name: time_key
+        tests:
+          - not_null
+          - unique
+
+      - name: hour_24
+        tests:
+          - not_null
+
+      - name: minute
+        tests:
+          - not_null
+
+      - name: time_value
+        tests:
+          - not_null
+          - unique
+
+      - name: time_label
+        tests:
+          - not_null
+          - unique
+
+      - name: daypart
+        tests:
+          - not_null
+
+  - name: fct_orders
+    columns:
+      - name: order_id
+        tests:
+          - not_null
+          - unique
+
+      - name: order_number
+        tests:
+          - not_null
+          - unique
+
+      - name: store_id
+        tests:
+          - not_null
+
+      - name: store_sk
+        tests:
+          - not_null
+
+      - name: order_ts
+        tests:
+          - not_null
+
+      - name: business_date
+        tests:
+          - not_null
+
+      - name: order_status
+        tests:
+          - not_null
+
+      - name: total_amount
+        tests:
+          - not_null
+
+  - name: fct_order_items
+    columns:
+      - name: order_item_id
+        tests:
+          - not_null
+          - unique
+
+      - name: order_id
+        tests:
+          - not_null
+
+      - name: product_id
+        tests:
+          - not_null
+
+      - name: product_sk
+        tests:
+          - not_null
+
+      - name: quantity
+        tests:
+          - not_null
+
+      - name: line_total
+        tests:
+          - not_null
+
+      - name: historical_unit_cost
+        tests:
+          - not_null
+
+      - name: line_cost
+        tests:
+          - not_null
+
+      - name: gross_margin
+        tests:
+          - not_null
+
+  - name: fct_payments
+    columns:
+      - name: payment_id
+        tests:
+          - not_null
+          - unique
+
+      - name: order_id
+        tests:
+          - not_null
+
+      - name: store_sk
+        tests:
+          - not_null
+
+      - name: business_date
+        tests:
+          - not_null
+
+      - name: payment_method
+        tests:
+          - not_null
+
+      - name: amount
+        tests:
+          - not_null
+
+      - name: payment_status
+        tests:
+          - not_null
+
+      - name: updated_at
+        tests:
+          - not_null
+
+  - name: fct_store_daily_sales
+    columns:
+      - name: store_day_key
+        tests:
+          - not_null
+          - unique
+
+      - name: business_date
+        tests:
+          - not_null
+
+      - name: store_sk
+        tests:
+          - not_null
+
+      - name: store_id
+        tests:
+          - not_null
+
+      - name: area_id
+        tests:
+          - not_null
+
+      - name: transaction_count
+        tests:
+          - not_null
+
+      - name: total_sales
+        tests:
+          - not_null
+
+      - name: product_quantity
+        tests:
+          - not_null
+
+      - name: total_cost
+        tests:
+          - not_null
+
+      - name: gross_margin
+        tests:
+          - not_null
+
+      - name: is_open_day
+        tests:
+          - not_null

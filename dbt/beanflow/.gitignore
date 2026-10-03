@@ -1,0 +1,7 @@
+# Local dbt configuration — never commit credentials/config
+.dbt/
+
+# dbt generated artifacts
+target/
+dbt_packages/
+logs/
