@@ -2,7 +2,7 @@ COMPOSE := docker compose
 PY ?= $(CURDIR)/simulator/.venv/bin/python
 MODE ?= run
 
-.PHONY: up down logs ps check-env dev-bootstrap dev-loop dev-reset test dashboards screenshots
+.PHONY: up down logs ps check-env dev-bootstrap dev-loop dev-reset test dashboards screenshots report
 
 check-env:
 	@test -f .env || { echo "Missing .env - run: cp .env.example .env  (then set POSTGRES_PASSWORD)"; exit 1; }
@@ -54,3 +54,7 @@ dashboards:
 screenshots:
 	cd bi/metabase && npm install --silent
 	node bi/metabase/screenshot.mjs bi/metabase/dashboards.json docs/images
+
+## Rebuild the static KPI report (docs/kpi_report.html) from the BigQuery gold marts
+report:
+	$(PY) bi/report/build_report.py

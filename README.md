@@ -2,6 +2,10 @@
 
 An end-to-end retail analytics portfolio project that simulates a multi-store coffee business and demonstrates practical **Data Engineering** and **Data Analytics** workflows.
 
+**[View the live KPI report →](https://almontemike2001-star.github.io/retail-analytics-platform/kpi_report.html)**
+
+![BeanFlow KPI report](docs/images/kpi_report.png)
+
 BeanFlow Coffee covers the complete path from operational data generation to business intelligence:
 
 ```text
@@ -452,6 +456,24 @@ Recency
 Frequency
 Monetary
 Customer Segment
+```
+
+---
+
+# Live KPI Report
+
+[`docs/kpi_report.html`](https://almontemike2001-star.github.io/retail-analytics-platform/kpi_report.html)
+is a static, self-contained page served by GitHub Pages. `make report` runs
+[`bi/report/build_report.py`](bi/report/build_report.py), which queries the BigQuery gold marts
+and embeds the results in the page. Viewers need no BigQuery or Metabase access.
+
+It covers the headline KPIs, daily sales and ADS, raw regional sales next to ADS per open
+store-day (with an insight sentence computed from the data), daily ADS by region, top stores, ADS by
+store type, category sales and margin, and RFM segments. Every chart has a table view, and the
+page follows the viewer's light or dark mode.
+
+```bash
+make report        # needs Application Default Credentials (gcloud auth application-default login)
 ```
 
 ---

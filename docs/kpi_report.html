@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BeanFlow KPI Report</title>
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-0: #f4f3f0;
+    --surface-1: #fcfcfb;
+    --border: #e2e0da;
+    --grid: #ebe9e4;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #7a7973;
+    --series-1: #2a78d6;
+    --series-2: #eb6834;
+    --series-3: #1baf7a;
+    --series-4: #eda100;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --surface-0: #111110;
+      --surface-1: #1a1a19;
+      --border: #2e2d2b;
+      --grid: #262624;
+      --text-primary: #f0efec;
+      --text-secondary: #c3c2b7;
+      --text-muted: #8f8e86;
+      --series-1: #3987e5;
+      --series-2: #d95926;
+      --series-3: #199e70;
+      --series-4: #c98500;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-0: #111110;
+    --surface-1: #1a1a19;
+    --border: #2e2d2b;
+    --grid: #262624;
+    --text-primary: #f0efec;
+    --text-secondary: #c3c2b7;
+    --text-muted: #8f8e86;
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --series-4: #c98500;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--surface-0); color: var(--text-primary);
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+  }
+  main { max-width: 1180px; margin: 0 auto; padding: 32px 16px 64px; }
+  header p { color: var(--text-secondary); margin: 4px 0 0; max-width: 72ch; }
+  h1 { font-size: 28px; margin: 0; letter-spacing: -0.01em; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted);
+       margin: 36px 0 12px; font-weight: 600; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+  .tile, .card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; }
+  .tile { padding: 14px 16px; }
+  .tile .label { font-size: 12px; color: var(--text-secondary); }
+  .tile .value { font-size: 26px; font-weight: 650; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .tile .note { font-size: 12px; color: var(--text-muted); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr)); gap: 16px; }
+  .card { padding: 16px 16px 8px; min-width: 0; }
+  .card.wide { grid-column: 1 / -1; }
+  .card h3 { margin: 0; font-size: 15px; }
+  .card .sub { margin: 2px 0 0; font-size: 13px; color: var(--text-secondary); }
+  .insight { margin: 4px 0 8px; font-size: 13px; color: var(--text-primary); }
+  .chart { height: 300px; }
+  details { margin: 4px 0 8px; font-size: 13px; color: var(--text-secondary); }
+  summary { cursor: pointer; }
+  table { border-collapse: collapse; width: 100%; margin-top: 8px; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--grid); }
+  th { color: var(--text-muted); font-weight: 600; }
+  .scroll { overflow-x: auto; }
+  footer { margin-top: 40px; font-size: 12px; color: var(--text-muted); }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>BeanFlow KPI Report</h1>
+    <p id="intro">Gold-layer metrics for a synthetic multi-store coffee chain, built by the BeanFlow pipeline:
+       PostgreSQL POS → Python incremental EL → BigQuery → dbt. All data is synthetic.</p>
+  </header>
+
+  <h2>Sales</h2>
+  <div class="tiles" id="sales-tiles"></div>
+  <h2>Network, products and customers</h2>
+  <div class="tiles" id="network-tiles"></div>
+
+  <h2>Charts</h2>
+  <div class="grid">
+    <section class="card"><h3>Daily sales (PHP)</h3><p class="sub">Completed orders per business day</p>
+      <div class="chart" id="c-daily"></div><details><summary>Table</summary><div class="scroll" id="t-daily"></div></details></section>
+    <section class="card"><h3>Daily ADS</h3><p class="sub">Average daily sales per open store-day (PHP)</p>
+      <div class="chart" id="c-ads"></div><details><summary>Table</summary><div class="scroll" id="t-ads"></div></details></section>
+    <section class="card"><h3>Sales by region (raw total)</h3><p class="sub">Total sales (PHP)</p>
+      <div class="chart" id="c-region-sales"></div><details><summary>Table</summary><div class="scroll" id="t-regions"></div></details></section>
+    <section class="card"><h3>ADS by region (fair comparison)</h3><p class="sub">Sales per open store-day (PHP)</p>
+      <div class="chart" id="c-region-ads"></div><p class="insight" id="region-insight"></p></section>
+    <section class="card wide"><h3>Daily ADS by region</h3><p class="sub">Sales per open store-day, by business day (PHP)</p>
+      <div class="chart" id="c-region-daily"></div><details><summary>Table</summary><div class="scroll" id="t-region-daily"></div></details></section>
+    <section class="card"><h3>Top 10 stores by sales</h3><p class="sub">Hover for region, type and ADS</p>
+      <div class="chart" id="c-stores"></div><details><summary>Table</summary><div class="scroll" id="t-stores"></div></details></section>
+    <section class="card"><h3>ADS by store type</h3><p class="sub">Sales per open store-day (PHP)</p>
+      <div class="chart" id="c-types"></div><details><summary>Table</summary><div class="scroll" id="t-types"></div></details></section>
+    <section class="card"><h3>Sales by category</h3><p class="sub">Product sales (PHP); hover for gross margin %</p>
+      <div class="chart" id="c-categories"></div><details><summary>Table</summary><div class="scroll" id="t-categories"></div></details></section>
+    <section class="card"><h3>Customers by RFM segment</h3><p class="sub">Recency, frequency and monetary scoring; hover for sales</p>
+      <div class="chart" id="c-rfm"></div><details><summary>Table</summary><div class="scroll" id="t-rfm"></div></details></section>
+  </div>
+
+  <footer>Generated by <code>make report</code> from the BigQuery gold marts
+    (<a href="https://github.com/almontemike2001-star/retail-analytics-platform">source</a>).
+    KPI formulas follow <code>docs/kpi_definitions.md</code>: ratios are recomputed, never averaged.</footer>
+</main>
+<script>
+const DATA = {"kpis": [{"total_sales": 5205346.11, "transactions": 17341, "aov": 300.17565942, "ads": 6466.268459627, "adq": 38.2, "gross_margin_rate": 0.655789887, "units": 30751, "store_days": 805, "first_day": "2026-09-25", "last_day": "2026-10-01", "business_days": 7}], "network": [{"stores": 115, "regions": 4}], "customers": [{"customers": 7332, "avg_spend": 448.095725586, "avg_orders": 1.4753136933987976}], "daily": [{"day": "2026-09-25", "sales": 727312.32, "transactions": 2494, "ads": 6324.454956522, "adq": 37.38260869565217}, {"day": "2026-09-26", "sales": 821418.08, "transactions": 2617, "ads": 7142.765913043, "adq": 41.608695652173914}, {"day": "2026-09-27", "sales": 734005.44, "transactions": 2400, "ads": 6382.656, "adq": 37.17391304347826}, {"day": "2026-09-28", "sales": 698090.4, "transactions": 2309, "ads": 6070.351304348, "adq": 35.74782608695652}, {"day": "2026-09-29", "sales": 684010.85, "transactions": 2349, "ads": 5947.920434783, "adq": 35.608695652173914}, {"day": "2026-09-30", "sales": 790964.94, "transactions": 2648, "ads": 6877.956, "adq": 40.95652173913044}, {"day": "2026-10-01", "sales": 749544.08, "transactions": 2524, "ads": 6517.774608696, "adq": 38.92173913043478}], "regions": [{"region": "Metro Manila", "sales": 2448210.11, "store_days": 350, "ads": 6994.886028571, "adq": 41.47142857142857}, {"region": "South Luzon", "sales": 1225068.41, "store_days": 203, "ads": 6034.819753695, "adq": 36.0}, {"region": "Visayas & Mindanao", "sales": 900885.21, "store_days": 140, "ads": 6434.894357143, "adq": 37.52857142857143}, {"region": "North Luzon", "sales": 631182.38, "store_days": 112, "ads": 5635.556964286, "adq": 32.80357142857143}], "region_daily": [{"day": "2026-09-25", "region": "Metro Manila", "ads": 6784.96}, {"day": "2026-09-25", "region": "North Luzon", "ads": 5345.97}, {"day": "2026-09-25", "region": "South Luzon", "ads": 5909.004137931}, {"day": "2026-09-25", "region": "Visayas & Mindanao", "ads": 6558.384}, {"day": "2026-09-26", "region": "Metro Manila", "ads": 7187.8464}, {"day": "2026-09-26", "region": "North Luzon", "ads": 6388.83}, {"day": "2026-09-26", "region": "South Luzon", "ads": 7198.27862069}, {"day": "2026-09-26", "region": "Visayas & Mindanao", "ads": 7552.72}, {"day": "2026-09-27", "region": "Metro Manila", "ads": 6213.8496}, {"day": "2026-09-27", "region": "North Luzon", "ads": 5833.24}, {"day": "2026-09-27", "region": "South Luzon", "ads": 6484.452413793}, {"day": "2026-09-27", "region": "Visayas & Mindanao", "ads": 7096.6}, {"day": "2026-09-28", "region": "Metro Manila", "ads": 6971.2384}, {"day": "2026-09-28", "region": "North Luzon", "ads": 4984.98}, {"day": "2026-09-28", "region": "South Luzon", "ads": 5475.023448276}, {"day": "2026-09-28", "region": "Visayas & Mindanao", "ads": 5549.656}, {"day": "2026-09-29", "region": "Metro Manila", "ads": 6517.3426}, {"day": "2026-09-29", "region": "North Luzon", "ads": 5342.20375}, {"day": "2026-09-29", "region": "South Luzon", "ads": 5435.946551724}, {"day": "2026-09-29", "region": "Visayas & Mindanao", "ads": 5751.3005}, {"day": "2026-09-30", "region": "Metro Manila", "ads": 7922.031}, {"day": "2026-09-30", "region": "North Luzon", "ads": 5814.9}, {"day": "2026-09-30", "region": "South Luzon", "ads": 5989.62862069}, {"day": "2026-09-30", "region": "Visayas & Mindanao", "ads": 6406.288}, {"day": "2026-10-01", "region": "Metro Manila", "ads": 7366.9342}, {"day": "2026-10-01", "region": "North Luzon", "ads": 5738.775}, {"day": "2026-10-01", "region": "South Luzon", "ads": 5751.404482759}, {"day": "2026-10-01", "region": "Visayas & Mindanao", "ads": 6129.312}], "top_stores": [{"store": "Taguig Mall 2", "region": "Metro Manila", "type": "Mall", "sales": 102506.88, "ads": 14643.84}, {"store": "Pasig Mall", "region": "Metro Manila", "type": "Mall", "sales": 80782.8, "ads": 11540.4}, {"store": "Santa Rosa Mall", "region": "South Luzon", "type": "Mall", "sales": 73747.52, "ads": 10535.36}, {"store": "Quezon City Mall", "region": "Metro Manila", "type": "Mall", "sales": 73512.88, "ads": 10501.84}, {"store": "Davao City Mall 2", "region": "Visayas & Mindanao", "type": "Mall", "sales": 70938.11, "ads": 10134.015714286}, {"store": "Manila Mall", "region": "Metro Manila", "type": "Mall", "sales": 68953.36, "ads": 9850.48}, {"store": "Taguig Kiosk", "region": "Metro Manila", "type": "Kiosk", "sales": 68774.72, "ads": 9824.96}, {"store": "Taguig Mall 4", "region": "Metro Manila", "type": "Mall", "sales": 66519.04, "ads": 9502.72}, {"store": "Dasmari\u00f1as Drive-Thru", "region": "South Luzon", "type": "Drive Thru", "sales": 66085.6, "ads": 9440.8}, {"store": "Manila Kiosk 2", "region": "Metro Manila", "type": "Kiosk", "sales": 65435.44, "ads": 9347.92}], "store_types": [{"type": "Mall", "stores": 31, "ads": 8144.476866359}, {"type": "Drive Thru", "stores": 18, "ads": 6771.479920635}, {"type": "Kiosk", "stores": 24, "ads": 5957.413333333}, {"type": "Office", "stores": 19, "ads": 5557.653834586}, {"type": "Street", "stores": 23, "ads": 5247.048198758}], "categories": [{"category": "Iced Coffee", "sales": 935040.0, "units": 6258, "margin": 0.725309837}, {"category": "Espresso Classics", "sales": 558640.0, "units": 4184, "margin": 0.730219479}, {"category": "All-Day Meals", "sales": 524275.0, "units": 2310, "margin": 0.544509599}, {"category": "Frappes", "sales": 510240.0, "units": 2825, "margin": 0.675034004}, {"category": "Signature Lattes", "sales": 506665.0, "units": 2947, "margin": 0.698120395}, {"category": "Pastries", "sales": 468005.0, "units": 5406, "margin": 0.581270627}, {"category": "Sandwiches & Wraps", "sales": 432006.0, "units": 2444, "margin": 0.540757351}, {"category": "Non-Coffee", "sales": 340870.0, "units": 2111, "margin": 0.703523484}, {"category": "Tea & Refreshers", "sales": 203440.0, "units": 1718, "margin": 0.769952222}, {"category": "Merchandise", "sales": 200883.0, "units": 548, "margin": 0.484375084}], "rfm": [{"segment": "At Risk", "customers": 1556, "sales": 599595.36}, {"segment": "Hibernating", "customers": 1378, "sales": 423762.08}, {"segment": "Needs Attention", "customers": 1124, "sales": 335945.56}, {"segment": "Champions", "customers": 1079, "sales": 1118836.42}, {"segment": "Potential Loyalists", "customers": 999, "sales": 292807.75}, {"segment": "Loyal Customers", "customers": 991, "sales": 449162.55}, {"segment": "New Customers", "customers": 205, "sales": 65328.14}], "region_insight": "South Luzon sells more than Visayas & Mindanao in total, but only because it has more store-days. Per open store-day, Visayas & Mindanao is ahead. Normalizing changes the ranking."};
+const fmt = {
+  int: v => v == null ? "–" : Math.round(v).toLocaleString("en-US"),
+  php: v => v == null ? "–" : "₱" + Math.round(v).toLocaleString("en-US"),
+  php2: v => v == null ? "–" : "₱" + v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+  phpM: v => v == null ? "–" : "₱" + (v / 1e6).toFixed(2) + "M",
+  pct: v => v == null ? "–" : (v * 100).toFixed(2) + "%",
+  dec: v => v == null ? "–" : v.toFixed(1),
+  day: s => new Date(s + "T00:00").toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" }),
+};
+const k = DATA.kpis[0], n = DATA.network[0], cu = DATA.customers[0];
+const tile = (label, value, note = "") =>
+  `<div class="tile"><div class="label">${label}</div><div class="value">${value}</div><div class="note">${note}</div></div>`;
+document.getElementById("intro").textContent +=
+  ` Period: ${fmt.day(k.first_day)} – ${fmt.day(k.last_day)} ${k.last_day.slice(0, 4)} (${k.business_days} business days).`;
+document.getElementById("sales-tiles").innerHTML = [
+  tile("Total sales", fmt.phpM(k.total_sales), fmt.php2(k.total_sales)),
+  tile("Transactions", fmt.int(k.transactions), "completed orders"),
+  tile("AOV", fmt.php2(k.aov), "sales ÷ transactions"),
+  tile("ADS", fmt.php(k.ads), "sales per open store-day"),
+  tile("ADQ", fmt.dec(k.adq), "units per open store-day"),
+  tile("Gross margin", fmt.pct(k.gross_margin_rate), "on historical product cost"),
+].join("");
+document.getElementById("network-tiles").innerHTML = [
+  tile("Stores", fmt.int(n.stores), `across ${n.regions} regions`),
+  tile("Open store-days", fmt.int(k.store_days), "ADS and ADQ denominator"),
+  tile("Units sold", fmt.int(k.units)),
+  tile("Purchasing customers", fmt.int(cu.customers), "with an RFM score"),
+  tile("Avg spend per customer", fmt.php(cu.avg_spend)),
+  tile("Avg orders per customer", cu.avg_orders.toFixed(2)),
+].join("");
+document.getElementById("region-insight").textContent = DATA.region_insight;
+
+function table(id, rows, cols) {
+  document.getElementById(id).innerHTML =
+    `<table><thead><tr>${cols.map(c => `<th>${c[0]}</th>`).join("")}</tr></thead><tbody>` +
+    rows.map(r => `<tr>${cols.map(c => `<td>${c[1](r)}</td>`).join("")}</tr>`).join("") + "</tbody></table>";
+}
+const REGIONS = DATA.regions.map(r => r.region); // fixed order (by total sales) so colours follow the region
+const regionDaily = DATA.region_daily.reduce((acc, r) => ((acc[r.day] ??= {})[r.region] = r.ads, acc), {});
+const days = Object.keys(regionDaily).sort();
+table("t-daily", DATA.daily, [["Date", r => fmt.day(r.day)], ["Sales", r => fmt.php(r.sales)], ["Transactions", r => fmt.int(r.transactions)]]);
+table("t-ads", DATA.daily, [["Date", r => fmt.day(r.day)], ["ADS", r => fmt.php(r.ads)], ["ADQ", r => fmt.dec(r.adq)]]);
+table("t-regions", DATA.regions, [["Region", r => r.region], ["Sales", r => fmt.php(r.sales)], ["Store-days", r => fmt.int(r.store_days)], ["ADS", r => fmt.php(r.ads)], ["ADQ", r => fmt.dec(r.adq)]]);
+table("t-region-daily", days.map(d => ({ d })), [["Date", r => fmt.day(r.d)], ...REGIONS.map(g => [g, r => fmt.php(regionDaily[r.d][g])])]);
+table("t-stores", DATA.top_stores, [["Store", r => r.store], ["Region", r => r.region], ["Type", r => r.type], ["Sales", r => fmt.php(r.sales)], ["ADS", r => fmt.php(r.ads)]]);
+table("t-types", DATA.store_types, [["Type", r => r.type], ["Stores", r => fmt.int(r.stores)], ["ADS", r => fmt.php(r.ads)]]);
+table("t-categories", DATA.categories, [["Category", r => r.category], ["Sales", r => fmt.php(r.sales)], ["Units", r => fmt.int(r.units)], ["Gross margin", r => fmt.pct(r.margin)]]);
+table("t-rfm", DATA.rfm, [["Segment", r => r.segment], ["Customers", r => fmt.int(r.customers)], ["Sales", r => fmt.php(r.sales)]]);
+
+function draw() {
+  const css = getComputedStyle(document.documentElement);
+  const v = name => css.getPropertyValue(name).trim();
+  const S = [v("--series-1"), v("--series-2"), v("--series-3"), v("--series-4")];
+  const base = (extra = {}) => ({
+    paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+    font: { color: v("--text-secondary"), size: 12 },
+    margin: { l: 56, r: 12, t: 8, b: 36 },
+    hoverlabel: { bgcolor: v("--surface-1"), bordercolor: v("--border"), font: { color: v("--text-primary") } },
+    xaxis: { gridcolor: v("--grid"), linecolor: v("--border"), zeroline: false, ...(extra.xaxis || {}) },
+    yaxis: { gridcolor: v("--grid"), linecolor: v("--border"), zeroline: false, automargin: true, ...(extra.yaxis || {}) },
+    showlegend: false, bargap: 0.25, ...extra.rest,
+  });
+  const cfg = { displayModeBar: false, responsive: true };
+  const bar = { marker: { color: S[0], line: { width: 0 } } };
+  const hbar = (id, labels, values, hover, xfmt, custom) => Plotly.react(id, [{
+    type: "bar", orientation: "h", y: labels, x: values, customdata: custom, ...bar, hovertemplate: hover,
+  }], base({ xaxis: xfmt, yaxis: { autorange: "reversed", gridcolor: "rgba(0,0,0,0)" } }), cfg);
+  const line = (y, color) => ({ type: "scatter", mode: "lines+markers", line: { color, width: 2 },
+    marker: { size: 8, color, line: { color: v("--surface-1"), width: 2 } }, y });
+
+  Plotly.react("c-daily", [{ ...line(DATA.daily.map(r => r.sales), S[0]), x: DATA.daily.map(r => r.day),
+    hovertemplate: "%{x|%a %d %b}<br>₱%{y:,.0f}<extra></extra>" }],
+    base({ xaxis: { tickformat: "%a %d" }, yaxis: { tickprefix: "₱", tickformat: "~s", rangemode: "tozero" } }), cfg);
+  Plotly.react("c-ads", [{ ...line(DATA.daily.map(r => r.ads), S[0]), x: DATA.daily.map(r => r.day),
+    customdata: DATA.daily.map(r => r.adq.toFixed(1)),
+    hovertemplate: "%{x|%a %d %b}<br>ADS ₱%{y:,.0f}<br>ADQ %{customdata} units<extra></extra>" }],
+    base({ xaxis: { tickformat: "%a %d" }, yaxis: { tickprefix: "₱", tickformat: ",.0f", rangemode: "tozero" } }), cfg);
+  hbar("c-region-sales", REGIONS, DATA.regions.map(r => r.sales),
+    "%{y}<br>₱%{x:,.0f}<extra></extra>", { tickprefix: "₱", tickformat: "~s" });
+  const byAds = [...DATA.regions].sort((a, b) => b.ads - a.ads);
+  hbar("c-region-ads", byAds.map(r => r.region), byAds.map(r => r.ads),
+    "%{y}<br>₱%{x:,.0f} per open store-day<br>%{customdata:,} store-days<extra></extra>",
+    { tickprefix: "₱", tickformat: ",.0f" }, byAds.map(r => r.store_days));
+  Plotly.react("c-region-daily", REGIONS.map((g, i) => ({
+    ...line(days.map(d => regionDaily[d][g]), S[i]), x: days, name: g,
+    hovertemplate: `%{x|%a %d %b}<br>${g}: ₱%{y:,.0f}<extra></extra>`,
+  })), base({ xaxis: { tickformat: "%a %d" }, yaxis: { tickprefix: "₱", tickformat: ",.0f", rangemode: "tozero" },
+    rest: { showlegend: true, legend: { orientation: "h", y: 1.14, x: 0, font: { color: v("--text-secondary") } },
+            margin: { l: 56, r: 12, t: 28, b: 36 } } }), cfg);
+  hbar("c-stores", DATA.top_stores.map(r => r.store), DATA.top_stores.map(r => r.sales),
+    "%{y} · %{customdata[0]} · %{customdata[1]}<br>₱%{x:,.0f} sales<br>ADS ₱%{customdata[2]:,.0f}<extra></extra>",
+    { tickprefix: "₱", tickformat: "~s" }, DATA.top_stores.map(r => [r.region, r.type, r.ads]));
+  Plotly.react("c-types", [{ type: "bar", x: DATA.store_types.map(r => r.type), y: DATA.store_types.map(r => r.ads), ...bar,
+    customdata: DATA.store_types.map(r => r.stores),
+    hovertemplate: "%{x}<br>₱%{y:,.0f} per open store-day<br>%{customdata} stores<extra></extra>" }],
+    base({ yaxis: { tickprefix: "₱", tickformat: ",.0f" } }), cfg);
+  hbar("c-categories", DATA.categories.map(r => r.category), DATA.categories.map(r => r.sales),
+    "%{y}<br>₱%{x:,.0f} sales<br>%{customdata:.1%} gross margin<extra></extra>",
+    { tickprefix: "₱", tickformat: "~s" }, DATA.categories.map(r => r.margin));
+  hbar("c-rfm", DATA.rfm.map(r => r.segment), DATA.rfm.map(r => r.customers),
+    "%{y}<br>%{x:,} customers<br>₱%{customdata:,.0f} sales<extra></extra>", {}, DATA.rfm.map(r => r.sales));
+}
+draw();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+</script>
+</body>
+</html>
