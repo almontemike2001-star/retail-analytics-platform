@@ -2,7 +2,7 @@ COMPOSE := docker compose
 PY ?= $(CURDIR)/simulator/.venv/bin/python
 MODE ?= run
 
-.PHONY: up down logs ps check-env dev-bootstrap dev-loop dev-reset test
+.PHONY: up down logs ps check-env dev-bootstrap dev-loop dev-reset test dashboards screenshots
 
 check-env:
 	@test -f .env || { echo "Missing .env - run: cp .env.example .env  (then set POSTGRES_PASSWORD)"; exit 1; }
@@ -45,3 +45,12 @@ dev-reset: check-env
 test:
 	cd simulator && $(PY) -m pytest
 	cd ingestion && $(PY) -m pytest
+
+## Rebuild the Metabase dashboards through the API (needs MB_ADMIN_* in bi/metabase/.env)
+dashboards:
+	python3 bi/metabase/build_dashboards.py
+
+## Capture the public Metabase dashboards into docs/images (needs Node and Chrome)
+screenshots:
+	cd bi/metabase && npm install --silent
+	node bi/metabase/screenshot.mjs bi/metabase/dashboards.json docs/images

@@ -458,88 +458,71 @@ Customer Segment
 
 # Metabase Dashboards
 
+The three dashboards are built **as code** by [`bi/metabase/build_dashboards.py`](bi/metabase/build_dashboards.py),
+not by clicking. The script logs in to Metabase and creates every native-SQL question on the
+BigQuery gold marts, with field filters wired to the dashboard filters. It also lays out each
+dashboard and enables public links for the screenshots. Re-running it rebuilds everything from
+scratch, so the BI layer is reviewable in git like the dbt models.
+
+Every ratio is recomputed from its numerator and denominator at the level shown, as defined in
+[`docs/kpi_definitions.md`](docs/kpi_definitions.md). For example, ADS = sales ÷ open store-days,
+never an average of daily ADS. The totals reconcile exactly with the validated results:
+₱5,205,346.11 sales, 17,341 transactions, ADS ₱6,466 and 65.58% gross margin.
+
 ## Executive Overview
 
-![Executive Overview 1](docs/images/executive-overview-1.png)
+Filter: Business date.
 
-![Executive Overview 2](docs/images/executive-overview-2.png)
+![Executive Overview: KPIs and daily trends](docs/images/executive-overview-1.png)
 
-The Executive Overview includes:
+![Executive Overview: margin and day of week](docs/images/executive-overview-2.png)
 
-- Total Sales
-- Transactions
-- AOV
-- ADS
-- ADQ
-- Gross Margin
-- Gross Margin %
-- Daily sales trend
-- Regional performance
+- One row of headline KPIs: total sales, transactions, AOV, ADS, ADQ and gross margin %
+- Daily sales and transactions
+- Daily ADS and ADQ, as two charts instead of one dual-axis chart
+- Gross margin % by day and sales by day of week
 
 ---
 
 ## Store Performance
 
-![Store Performance 1](docs/images/store-performance-1.png)
+Filters: Business date, Region, Area, Store type, Store.
 
-![Store Performance 2](docs/images/store-performance-2.png)
+![Store Performance: KPIs, regions and store rankings](docs/images/store-performance-1.png)
 
-![Store Performance 3](docs/images/store-performance-3.png)
+![Store Performance: store type, margin and regional trend](docs/images/store-performance-2.png)
 
-The Store Performance dashboard supports filters for:
+![Store Performance: store scorecard](docs/images/store-performance-3.png)
 
-- Business Date
-- Region
-- Area
-- Store Type
-- Store
-
-It includes:
-
-- sales by region
-- ADS by region
-- ADQ by region
-- top stores
-- store-type performance
-- gross margin analysis
-- detailed store performance
+- **Sales by region (raw total)** next to **ADS by region (fair comparison)**. South Luzon outsells
+  Visayas & Mindanao in total only because it has more stores open. Per open store-day, Visayas & Mindanao is ahead.
+- Top 10 stores by sales and bottom 10 stores by ADS, to show both leaders and underperformers
+- ADS by store type, gross margin % by region, and daily ADS by region
+- A scorecard for all 115 stores: sales, transactions, AOV, ADS, ADQ and margin %
 
 ---
 
 ## Product & Customer Analytics
 
-![Product and Customer Analytics 1](docs/images/product-customer-analytics-1.png)
+Filters: Business date, Category, Product (products section), and RFM segment, Loyalty tier,
+Cohort month (customers section).
 
-![Product and Customer Analytics 2](docs/images/product-customer-analytics-2.png)
+![Product & Customer Analytics: products](docs/images/product-customer-analytics-1.png)
 
-![Product and Customer Analytics 3](docs/images/product-customer-analytics-3.png)
+![Product & Customer Analytics: customers](docs/images/product-customer-analytics-2.png)
 
-This dashboard contains separate analytical sections for:
+### Products
 
-### Product Performance
+- Units sold, product sales, gross margin % and average selling price
+- Top 10 products by sales and by units
+- Sales and gross margin % by category
 
-- Product Sales
-- Units Sold
-- Gross Margin
-- Gross Margin %
-- Average Selling Price
-- Category performance
-- Product rankings
+### Customers
 
-### Customer Retention
-
-- Cohort Size
-- Active Customers
-- Month Number
-- Retention Rate
-
-### Customer RFM
-
-- Purchasing Customers
-- Customer Sales
-- Average Customer Spend
-- Customers by RFM Segment
-- Sales by RFM Segment
+- Purchasing customers, customer sales, average spend and average orders per customer
+- Customers and sales by RFM segment
+- Cohort retention table, shaded by retention rate
+- Customers and spend by loyalty tier
 
 ---
 
@@ -820,6 +803,16 @@ http://localhost:3000
 ```
 
 The portfolio setup connects Metabase to BigQuery using a dedicated read-only Google Cloud service account.
+
+Build or rebuild the dashboards (after adding `MB_ADMIN_EMAIL` and `MB_ADMIN_PASSWORD` to
+`bi/metabase/.env`):
+
+```bash
+make dashboards    # questions, filters and layout through the Metabase API
+make screenshots   # optional: regenerate docs/images from the public dashboard links
+```
+
+The original hand-built dashboards are kept in an "Archive (v1)" collection.
 
 Service-account JSON files must never be committed.
 

@@ -53,3 +53,8 @@ data/audit/
 
 # Additional GCP credential patterns
 application_default_credentials.json
+
+# Metabase tooling
+node_modules/
+bi/metabase/package-lock.json
+bi/metabase/dashboards.json
