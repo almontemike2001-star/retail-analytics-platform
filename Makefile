@@ -57,4 +57,4 @@ screenshots:
 
 ## Rebuild the static KPI report (docs/kpi_report.html) from the BigQuery gold marts
 report:
-	$(PY) bi/report/build_report.py
+	"$(PY)" bi/report/build_report.py
